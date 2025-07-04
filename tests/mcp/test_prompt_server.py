@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from agents import Agent, Runner
@@ -11,15 +13,15 @@ class FakeMCPPromptServer(MCPServer):
     """Fake MCP server for testing prompt functionality"""
 
     def __init__(self, server_name: str = "fake_prompt_server"):
-        self.prompts = []
-        self.prompt_results = {}
+        self.prompts: list[Any] = []
+        self.prompt_results: dict[str, str] = {}
         self._server_name = server_name
 
-    def add_prompt(self, name: str, description: str, arguments: dict = None):
+    def add_prompt(self, name: str, description: str, arguments: dict[str, Any] | None = None):
         """Add a prompt to the fake server"""
         from mcp.types import Prompt
 
-        prompt = Prompt(name=name, description=description, arguments=arguments or [])
+        prompt = Prompt(name=name, description=description, arguments=[])
         self.prompts.append(prompt)
 
     def set_prompt_result(self, name: str, result: str):
@@ -38,7 +40,7 @@ class FakeMCPPromptServer(MCPServer):
 
         return ListPromptsResult(prompts=self.prompts)
 
-    async def get_prompt(self, name: str, arguments: dict = None):
+    async def get_prompt(self, name: str, arguments: dict[str, Any] | None = None):
         """Get a prompt with arguments"""
         from mcp.types import GetPromptResult, PromptMessage, TextContent
 
@@ -61,7 +63,7 @@ class FakeMCPPromptServer(MCPServer):
     async def list_tools(self, run_context=None, agent=None):
         return []
 
-    async def call_tool(self, tool_name: str, arguments: dict = None):
+    async def call_tool(self, tool_name: str, arguments: dict[str, Any] | None = None):
         raise NotImplementedError("This fake server doesn't support tools")
 
     @property
@@ -193,10 +195,10 @@ async def test_agent_with_prompt_instructions_streaming(streaming: bool):
     model.add_multiple_turn_outputs([[get_text_message("Security analysis complete.")]])
 
     if streaming:
-        result = Runner.run_streamed(agent, input="Review code")
-        async for _ in result.stream_events():
+        streaming_result = Runner.run_streamed(agent, input="Review code")
+        async for _ in streaming_result.stream_events():
             pass
-        final_result = result.final_output
+        final_result = streaming_result.final_output
     else:
         result = await Runner.run(agent, input="Review code")
         final_result = result.final_output
