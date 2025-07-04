@@ -13,7 +13,7 @@ from agents.model_settings import ModelSettings
 async def get_instructions_from_prompt(mcp_server: MCPServer, prompt_name: str, **kwargs) -> str:
     """Get agent instructions by calling MCP prompt endpoint (user-controlled)"""
     print(f"Getting instructions from prompt: {prompt_name}")
-    
+
     try:
         prompt_result = await mcp_server.get_prompt(prompt_name, kwargs)
         instructions = prompt_result.messages[0].content.text
@@ -27,15 +27,15 @@ async def get_instructions_from_prompt(mcp_server: MCPServer, prompt_name: str, 
 async def demo_code_review(mcp_server: MCPServer):
     """Demo: Code review with user-selected prompt"""
     print("=== CODE REVIEW DEMO ===")
-    
+
     # User explicitly selects prompt and parameters
     instructions = await get_instructions_from_prompt(
         mcp_server,
         "generate_code_review_instructions",
         focus="security vulnerabilities",
-        language="python"
+        language="python",
     )
-    
+
     agent = Agent(
         name="Code Reviewer Agent",
         instructions=instructions,  # Instructions from MCP prompt
@@ -50,18 +50,17 @@ def process_user_input(user_input):
     return "Command executed"
 
 """
-    
+
     print(f"Running: {message[:60]}...")
     result = await Runner.run(starting_agent=agent, input=message)
     print(result.final_output)
-    print("\n" + "="*50 + "\n")
-
+    print("\n" + "=" * 50 + "\n")
 
 
 async def show_available_prompts(mcp_server: MCPServer):
     """Show available prompts for user selection"""
     print("=== AVAILABLE PROMPTS ===")
-    
+
     prompts_result = await mcp_server.list_prompts()
     print("User can select from these prompts:")
     for i, prompt in enumerate(prompts_result.prompts, 1):
@@ -77,7 +76,7 @@ async def main():
         trace_id = gen_trace_id()
         with trace(workflow_name="Simple Prompt Demo", trace_id=trace_id):
             print(f"Trace: https://platform.openai.com/traces/trace?trace_id={trace_id}\n")
-            
+
             await show_available_prompts(server)
             await demo_code_review(server)
 

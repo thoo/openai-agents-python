@@ -1,17 +1,17 @@
-import json
-from datetime import datetime
-from typing import Any, Dict
 from mcp.server.fastmcp import FastMCP
 
 # Create server
 mcp = FastMCP("Prompt Server")
 
+
 # Instruction-generating prompts (user-controlled)
 @mcp.prompt()
-def generate_code_review_instructions(focus: str = "general code quality", language: str = "python") -> str:
+def generate_code_review_instructions(
+    focus: str = "general code quality", language: str = "python"
+) -> str:
     """Generate agent instructions for code review tasks"""
     print(f"[debug-server] generate_code_review_instructions({focus}, {language})")
-    
+
     return f"""You are a senior {language} code review specialist. Your role is to provide comprehensive code analysis with focus on {focus}.
 
 INSTRUCTIONS:
@@ -31,6 +31,7 @@ RESPONSE FORMAT:
 6. Best Practices Suggestions
 
 Use the available tools to check current time if you need timestamps for your analysis."""
+
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
