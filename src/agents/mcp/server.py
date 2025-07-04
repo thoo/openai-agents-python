@@ -13,7 +13,7 @@ from mcp import ClientSession, StdioServerParameters, Tool as MCPTool, stdio_cli
 from mcp.client.sse import sse_client
 from mcp.client.streamable_http import GetSessionIdCallback, streamablehttp_client
 from mcp.shared.message import SessionMessage
-from mcp.types import CallToolResult, InitializeResult
+from mcp.types import CallToolResult, InitializeResult, GetPromptResult, ListPromptsResult
 from typing_extensions import NotRequired, TypedDict
 
 from ..exceptions import UserError
@@ -63,6 +63,22 @@ class MCPServer(abc.ABC):
         """Invoke a tool on the server."""
         pass
 
+    @abc.abstractmethod
+    async def list_prompts(
+        self,
+    ) -> ListPromptsResult:
+        """List the prompts available on the server."""
+        pass
+
+    @abc.abstractmethod
+    async def get_prompt(
+        self, 
+        name: str, 
+        arguments: dict[str, Any] | None = None
+    ) -> GetPromptResult:
+        """Get a specific prompt from the server."""
+        pass
+    
 
 class _MCPServerWithClientSession(MCPServer, abc.ABC):
     """Base class for MCP servers that use a `ClientSession` to communicate with the server."""
@@ -260,6 +276,26 @@ class _MCPServerWithClientSession(MCPServer, abc.ABC):
             raise UserError("Server not initialized. Make sure you call `connect()` first.")
 
         return await self.session.call_tool(tool_name, arguments)
+
+    async def list_prompts(
+        self,
+    ) -> ListPromptsResult:
+        """List the prompts available on the server."""
+        if not self.session:
+            raise UserError("Server not initialized. Make sure you call `connect()` first.")
+        
+        return await self.session.list_prompts()
+
+    async def get_prompt(
+        self, 
+        name: str, 
+        arguments: dict[str, Any] | None = None
+    ) -> GetPromptResult:
+        """Get a specific prompt from the server."""
+        if not self.session:
+            raise UserError("Server not initialized. Make sure you call `connect()` first.")
+        
+        return await self.session.get_prompt(name, arguments)
 
     async def cleanup(self):
         """Cleanup the server."""
