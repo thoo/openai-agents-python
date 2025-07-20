@@ -1,7 +1,7 @@
 import pytest
 from pydantic import BaseModel
 
-from agents import Agent, AgentBase, RunContextWrapper
+from agents import Agent, AgentBase, FunctionTool, RunContextWrapper
 
 
 class BoolCtx(BaseModel):
@@ -190,6 +190,7 @@ async def test_agent_as_tool_is_enabled_preserves_other_params():
 
     # Verify the tool was created with correct properties
     assert tool.name == "custom_tool_name"
+    assert isinstance(tool, FunctionTool)
     assert tool.description == "A custom tool with all parameters"
     assert tool.is_enabled is True
 
